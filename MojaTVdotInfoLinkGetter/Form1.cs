@@ -49,13 +49,6 @@ namespace MojaTVdotInfoLinkGetter
                         getLiveStreamLinksDotNetInfoLinks(item, stopwatch);
                     }
                 }
-
-                //
-
-                
-
-
-
             }
             catch (Exception)
             {
@@ -188,10 +181,132 @@ namespace MojaTVdotInfoLinkGetter
 
         private void getLiveStreamLinksDotNetInfoLinks(string url, Stopwatch stopwatch)
         {
+            List<TVStream> myTvList = new List<TVStream>();
+
+            using (WebClient client = new WebClient())
+            {
+                string htmlCode = client.DownloadString(url);
+                txtKimenet.AppendText($"{DateTime.Now} TV lista kész.\r\n");
+                txtKimenet.AppendText($"{DateTime.Now} TV-k URL-jeinek kiderítése....\r\n");
+                string[] htmlSplittedCode = htmlCode.Split(new char[] { ' ', '<', '>' });
+
+                var newTvListItem = new TVStream();
+                var inArticle = false;
+                
+                for (int i = 0; i < htmlSplittedCode.Length; i++)
+                {
+                    if (htmlSplittedCode[i].Length == 0)
+                    {
+                        continue;
+                    }
+
+
+
+                    if (htmlSplittedCode[i].IndexOf("article") == 0)
+                    {
+                        // a new group begins
+                        newTvListItem = new TVStream();
+                        inArticle = true;
+
+                    }
+                    else if (htmlSplittedCode[i].Contains("/article"))
+                    {
+                        // a new group closes
+                        myTvList.Add(newTvListItem);
+
+                        inArticle = false;
+
+                    }
+                    else if (inArticle && htmlSplittedCode[i].IndexOf("href") == 0)
+                    {
+                        // here is the URL of the stream
+                        newTvListItem.Href =
+                            htmlSplittedCode[i].Split('"')[1].Insert(0, @"http://livestreamlinks.net/");
+
+                        // and after that there is the title
+                        // TODO fix this double-title
+
+                        i += 1;
+                        var tmp = htmlSplittedCode[i].Split('"')[1];
+                        i += 1;
+
+                        while (htmlSplittedCode[i].IndexOf("/a") != 0)
+                        {
+                            tmp += " " + htmlSplittedCode[i];
+                            i += 1;
+                        }
+
+                        newTvListItem.Name = tmp;
+                    }
+                    else if (inArticle && htmlSplittedCode[i].IndexOf("src") == 0)
+                    {
+                        // here is the tv image url
+                        newTvListItem.ImgSrc =
+                            htmlSplittedCode[i].Split('"')[1].Remove(0, 1).Insert(0, @"http://livestreamlinks.net");
+                    }
+
+                }
+
+                txtKimenet.AppendText($"{DateTime.Now} TV-k URL-jei megvannak!\r\n");
+
+                // TODO EPG ID
+
+                // download each and every HTML page and get the correct M3u8 stream links
+                var tvIndexInList = 0;
+
+                for (tvIndexInList = 0; tvIndexInList < myTvList.Count;)
+                {
+                    txtKimenet.AppendText($"{DateTime.Now} {tvIndexInList + 1}. stream URL-jének kiderítése....\r\n");
+                    string pageHtml = File.ReadAllText("c.html"); //                 local file for testing
+                    //string pageHtml = client.DownloadString(myTvList[tvIndexInList].Href);
+                    string[] pageHtmlCode = pageHtml.Split('\n');
+
+                    foreach (var item in pageHtmlCode)
+                    {
+                        if (item.IndexOf("iframe") > -1)
+                        {
+                            myTvList[tvIndexInList].Href = item.Split('"')[1];
+                            tvIndexInList += 1;
+                            break;
+                        }
+
+                    }
+
+                    txtKimenet.AppendText($"{DateTime.Now} {tvIndexInList}. stream URL-je megvan.\r\n");
+
+                }
+
+
+                txtKimenet.AppendText($"{DateTime.Now} Az m3u8 lista megvan {stopwatch.Elapsed.TotalSeconds} másodperc alatt! Jöhet a fájlbaírás.\r\n");
+
+                // now we have to write the output
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.FileName = $"livestreamlinksNet_{DateTime.Now.Year}{DateTime.Now.Month.ToString("D2")}{DateTime.Now.Day.ToString("D2")}_{DateTime.Now.Hour.ToString("D2")}{DateTime.Now.Minute.ToString("D2")}{DateTime.Now.Second.ToString("D2")}.m3u8";
+                var dr = sfd.ShowDialog();
+
+                if (dr == DialogResult.OK)
+                {
+                    try
+                    {
+                        txtKimenet.AppendText($"{DateTime.Now} Fájlba írás megkezdődött.\r\n");
+                        File.WriteAllText(sfd.FileName, exportM3U(myTvList));
+                        txtKimenet.AppendText($"{DateTime.Now} Az m3u8 fájl lemezre írva. Folyamat vége.\r\n");
+
+                    }
+                    catch (Exception exc)
+                    {
+                        txtKimenet.AppendText($"{DateTime.Now} Hiba történt: {exc.Message}.\r\n");
+                    }
+
+                }
+
+
+
+            }
 
         }
 
-        private string exportM3U(List<TVStream> tvList)
+            private string exportM3U(List<TVStream> tvList)
         {
             string output = "#EXTM3U";
 
@@ -214,6 +329,18 @@ namespace MojaTVdotInfoLinkGetter
                     tvList.RemoveAt(i);
                 }
             }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            // csonk metódus a teszteléshez
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            txtKimenet.Text = ($"{DateTime.Now} TV-k listájának betöltése....\r\n");
+            getLiveStreamLinksDotNetInfoLinks("b.html", stopwatch);
+            stopwatch.Stop();
+            txtKimenet.AppendText($"\r\n   A folyamat {stopwatch.Elapsed.TotalSeconds} másodperc alatt befejeződött.\r\n");
+
         }
     }
 }
