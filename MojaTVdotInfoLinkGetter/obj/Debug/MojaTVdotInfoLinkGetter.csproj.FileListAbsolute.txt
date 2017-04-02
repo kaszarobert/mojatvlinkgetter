@@ -1,8 +1,0 @@
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\bin\Debug\MojaTVdotInfoLinkGetter.exe.config
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\bin\Debug\MojaTVdotInfoLinkGetter.exe
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\bin\Debug\MojaTVdotInfoLinkGetter.pdb
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\obj\Debug\MojaTVdotInfoLinkGetter.Form1.resources
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\obj\Debug\MojaTVdotInfoLinkGetter.Properties.Resources.resources
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\obj\Debug\MojaTVdotInfoLinkGetter.csproj.GenerateResource.Cache
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\obj\Debug\MojaTVdotInfoLinkGetter.exe
-D:\Melok\VS\MojaTVdotInfoLinkGetter\MojaTVdotInfoLinkGetter\obj\Debug\MojaTVdotInfoLinkGetter.pdb
